@@ -1,0 +1,93 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "SharedLib",
+			"command": "/usr/bin/clang",
+			"args": [
+				"-g",
+				"-shared",
+				"-ldl",
+				"-std=c99",
+				"sqlitelink.c",
+				"common.c",
+				"${workspaceFolder}/Libraries/Libs/parson.c",
+				"serialization.c",
+				"${workspaceFolder}/Libraries/Libs/sqlite3.c",
+				"-o",
+				"${workspaceFolder}/Libraries/Build/sqlitelink.dylib",
+				"-m64",
+				"-fPIC",
+				"-O2",
+				"-I\"${workspaceFolder}/Libraries/Libs\"",
+				"-I\"/Applications/Mathematica_12_1_1_release.app/Contents/SystemFiles/IncludeFiles/C\"",
+				"-I\"/Applications/Mathematica_12_1_1_release.app/Contents/SystemFiles/Links/MathLink/DeveloperKit/MacOSX-x86-64/CompilerAdditions\"",
+				"-L\"/Applications/Mathematica_12_1_1_release.app/Contents/SystemFiles/Libraries/MacOSX-x86-64\""
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/Libraries/SQLiteLink"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: /usr/bin/clang"
+		},
+		{
+			"type": "cppbuild",
+			"label": "TestSQLiteQueryAndSerialization",
+			"command": "/usr/bin/clang",
+			"args": [
+				"-g",
+				"-ldl",
+				"-std=c99",
+				"${workspaceFolder}/Libraries/SQLiteLink/Common/common.c",
+				"${workspaceFolder}/Libraries/Libs/parson.c",
+				"${workspaceFolder}/Libraries/SQLiteLink/Common/serialization.c",
+				"${workspaceFolder}/Libraries/SQLiteLink/Tests/test_sqlite.c",
+				"-l",
+				"sqlite3",
+				"-o",
+				"${workspaceFolder}/Libraries/Build/testdb",
+				"-I\"${workspaceFolder}/Libraries/Libs\""
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/Libraries/SQLiteLink"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: /usr/bin/clang"
+		},
+		{
+			"type": "cppbuild",
+			"label": "TestJSONSerialization",
+			"command": "/usr/bin/clang",
+			"args": [
+				"-g",
+				"-ldl",
+				"-std=c99",
+				"${workspaceFolder}/Libraries/Libs/parson.c",
+				"${workspaceFolder}/Libraries/SQLiteLink/Common/common.c",
+				"${workspaceFolder}/Libraries/SQLiteLink/Common/serialization.c",
+				"${workspaceFolder}/Libraries/SQLiteLink/Tests/test_serialization.c",
+				"-o",
+				"${workspaceFolder}/Libraries/Build/testser",
+				"-I\"${workspaceFolder}/Libraries/Libs\""
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/Libraries/SQLiteLink"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: /usr/bin/clang"
+		}
+	]
+}

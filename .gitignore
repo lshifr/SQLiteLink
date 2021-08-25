@@ -55,6 +55,6 @@ dkms.conf
 
 Build
 .history
-.vscode
+#.vscode
 # Perhaps temporarily, exclude Libraries/Libs. It should contain sqlite3.c, sqlite3.h. parson.c, parson.h
 Libraries/Libs 

@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "name": "MacOSX",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "/Applications/Mathematica_12_1_1_release.app/Contents/SystemFiles/IncludeFiles/C"
+      ],
+      "defines": [],
+      "compilerPath": "/usr/bin/clang",
+      "cStandard": "c11",
+      "cppStandard": "c++14",
+      "intelliSenseMode": "gcc-x64"
+    }
+  ],
+  "version": 4
+}

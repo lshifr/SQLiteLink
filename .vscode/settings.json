@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "serialization.h": "c",
+        "string.h": "c",
+        "db_common.h": "c",
+        "common.h": "c"
+    }
+}
