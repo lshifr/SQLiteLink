@@ -4,12 +4,12 @@
 #include "common.h"
 
 
-char *str_dup (const char* src){
-  char * result = (char *) malloc(strlen(src) + 1), *p = result;
-  if(!result){
+char* str_dup(const char* src) {
+  char* result = (char*)malloc(strlen(src) + 1), * p = result;
+  if (!result) {
     return NULL;
   }
-  while((*p++ = *src++))
-    ; 
+  while ((*p++ = *src++))
+    ;
   return result;
 }

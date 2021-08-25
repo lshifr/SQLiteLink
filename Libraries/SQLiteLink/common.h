@@ -8,6 +8,6 @@
 #define SUCCESS 0
 #define FAILURE 1
 
-char *str_dup (const char* src);
+char* str_dup(const char* src);
 
 #endif
