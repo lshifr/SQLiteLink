@@ -10,10 +10,6 @@
 #include "serialization.h"
 //#include "serialization_test.h"
 
-#define DB_PATH "test.db"
-
-
-#define RECREATE_AND_TEST_DB TRUE
 
 char* serialized_string = NULL;
 char* sqliteErrMsg = NULL;

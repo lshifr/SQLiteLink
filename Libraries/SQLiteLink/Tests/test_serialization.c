@@ -1,18 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "common.h"
-#include "serialization.h"
+#include "../Common/common.h"
+#include "../Common/serialization.h"
+
+typedef struct ser_info {
+  void* callback_data;
+} ser_info;
 
 static JSON_Status execute_mock_db(
   void* exec_data, int cb(void*, int, char**, char**)
 );
 
-int test_serialization(void) {
-  char* result = NULL;
+static void set_json_callback_data(void* exec_data, void* callback_data) {
+  ((ser_info*)exec_data)->callback_data = callback_data;
+};
 
-  if (serialize_to_json(execute_mock_db, &result) == JSONSuccess) {
+int test_serialization(void) {
+  const char* result = NULL;
+  ser_info sinfo = { NULL };
+
+  if (serialize_to_json(&sinfo, set_json_callback_data, execute_mock_db, &result) == JSONSuccess) {
     puts(result);
-    free(result);
+    free((void*)result);
     return SUCCESS;
   }
   else {
@@ -21,7 +30,7 @@ int test_serialization(void) {
   }
 }
 
-JSON_Status execute_mock_db(
+static JSON_Status execute_mock_db(
   void* exec_data, int cb(void*, int, char**, char**)
 ) {
   char* colnames[] = { "ID", "NAME", "AGE", "ADDRESS", "SALARY" };
@@ -38,11 +47,15 @@ JSON_Status execute_mock_db(
     n_cols = sizeof(test_array[0]) / sizeof(test_array[0][0]);
 
   for (int i = 0; i < n_rows; i++) {
-    if (cb(exec_data, n_cols, test_array[i], colnames) != SUCCESS) {
+    if (cb(((ser_info*)exec_data)->callback_data, n_cols, test_array[i], colnames) != SUCCESS) {
       puts("Error encountered in callback. Terminating...");
       return JSONFailure;
     }
   }
 
   return JSONSuccess;
+}
+
+int main() {
+  test_serialization();
 }

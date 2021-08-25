@@ -1,9 +1,9 @@
 #include <stdlib.h>
+#include <stdio.h> // puts
 #include "parson.h"
 #include "common.h"
 #include "serialization.h"
-#include "common.h"
-#include <stdio.h> // puts
+
 
 BOOL first_run = TRUE;
 BOOL callback_operation_failed = FALSE;
@@ -75,11 +75,13 @@ int json_serialization_callback(
 
 
 JSON_Status serialize_to_json(
+  void* exec_data,
+  void set_callback_data(void* exec_data, void* callback_data),
   JSON_Status exec(
     void* exec_data,
     int cb(void*, int, char**, char**)
   ),
-  char** result_ptr
+  const char** result_ptr
 ) {
   char* serialized_string = NULL;
   JSON_Status status = JSONFailure;
@@ -88,7 +90,10 @@ JSON_Status serialize_to_json(
   JSON_Object* main_obj = json_value_get_object(root_val);
 
   refresh_JSON_serialization_callback_state();
-  status = exec((void*)main_obj, json_serialization_callback);
+
+  set_callback_data(exec_data, (void*)main_obj);
+
+  status = exec(exec_data, json_serialization_callback);
 
   if (status == JSONSuccess) {
     serialized_string = json_serialize_to_string_pretty(root_val);
