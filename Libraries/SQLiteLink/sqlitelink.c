@@ -6,11 +6,11 @@
 #include "WolframLibrary.h"
 #include "parson.h"
 #include "Common/common.h"
-#include "Common/db_common.h"
+#include "Common/connections.h"
 #include "Common/serialization.h"
 
 
-db_info execution_data = {
+connection_info execution_data = {
   .serialized_string = NULL,
   .sqliteErrMsg = NULL,
   .file_path = NULL,
@@ -20,7 +20,7 @@ db_info execution_data = {
 };
 
 
-static db_info* get_execution_data(int connection_index) {
+static connection_info* get_execution_data(int connection_index) {
     return &execution_data;
 }
 
@@ -50,7 +50,7 @@ DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData)
 DLLEXPORT int sqlite_connect(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
     char* path = MArgument_getUTF8String(Args[0]);
     int result = 0;
-    db_info* dbinfo = get_execution_data(0);
+    connection_info* dbinfo = get_execution_data(0);
     if (!dbinfo->connection) {
         // TODO: as written, this can segfault. Needs a better test that connection is valid
         // TODO: handle error, or disallow connecting when connection is open
@@ -65,7 +65,7 @@ DLLEXPORT int sqlite_connect(WolframLibraryData libData, mint Argc, MArgument* A
 
 DLLEXPORT int sqlite_disconnect(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
     int result = 0;
-    db_info* dbinfo = get_execution_data(0);
+    connection_info* dbinfo = get_execution_data(0);
     if (dbinfo->connection) {
         result = sqlite3_close(dbinfo->connection);
         dbinfo->connection = NULL;
@@ -76,13 +76,13 @@ DLLEXPORT int sqlite_disconnect(WolframLibraryData libData, mint Argc, MArgument
 
 
 static void set_json_callback_data(void* exec_data, void* callback_data) {
-    ((db_info*)exec_data)->serialization_callback_data = callback_data;
+    ((connection_info*)exec_data)->serialization_callback_data = callback_data;
 }
 
 
 DLLEXPORT int sqlite_execute(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
     char* sql_string = MArgument_getUTF8String(Args[0]);
-    db_info* dbinfo = get_execution_data(0);
+    connection_info* dbinfo = get_execution_data(0);
     dbinfo->sql = str_dup(sql_string);
     JSON_Status result;
     libData->UTF8String_disown(sql_string);
@@ -114,7 +114,7 @@ DLLEXPORT int sqlite_get_last_error_string(
     WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res
 )
 {
-    db_info* dbinfo = get_execution_data(0);
+    connection_info* dbinfo = get_execution_data(0);
     const char* result = dbinfo->sqliteErrMsg ? dbinfo->sqliteErrMsg : "";
     MArgument_setUTF8String(Res, (char*)result);
     return LIBRARY_NO_ERROR;
@@ -122,7 +122,7 @@ DLLEXPORT int sqlite_get_last_error_string(
 
 
 static void free_globals(void) {
-    db_info* dbinfo = get_execution_data(0);
+    connection_info* dbinfo = get_execution_data(0);
     if (dbinfo->serialized_string) {
         free((void*)dbinfo->serialized_string);
         dbinfo->serialized_string = NULL;
@@ -140,7 +140,7 @@ static void free_globals(void) {
 
 static JSON_Status exec_sql(void* exec_data, int cb(void*, int, char**, char**)) {
     char* zErrMsg = NULL;
-    db_info* edt = (db_info*)exec_data;
+    connection_info* edt = (connection_info*)exec_data;
     DEBUG_STMT(printf(
         "About to execute SQL statement: \n%s\n, for connection %s\n",
         edt->sql,

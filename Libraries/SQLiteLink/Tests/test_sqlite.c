@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parson.h"
-#include "../Common/db_common.h"
+#include "../Common/connections.h"
 #include "../Common/common.h"
 #include "../Common/serialization.h"
 
@@ -24,7 +24,7 @@ static JSON_Status execute_sql_for_serialization(
   void* exec_data, int cb(void*, int, char**, char**)
 );
 static void set_json_callback_data(void* exec_data, void* callback_data);
-static db_info* get_execution_data(int connection_index);
+static connection_info* get_execution_data(int connection_index);
 
 // Global state
 const char* CREATE_TABLE_SQL =
@@ -51,7 +51,7 @@ const char* INSERT_DATA_SQL =
 
 const char* SELECT_DATA_SQL = "SELECT * from COMPANY";
 
-db_info execution_data = {
+connection_info execution_data = {
   .serialized_string = NULL,
   .sqliteErrMsg = NULL,
   .file_path = DB_PATH,
@@ -63,7 +63,7 @@ db_info execution_data = {
 
 int main(int argc, char* argv[])
 {
-  db_info* edt = get_execution_data(0); // Mock multi-connection case
+  connection_info* edt = get_execution_data(0); // Mock multi-connection case
   const char* sql = argc > 1 ? argv[1] : "SELECT ID, NAME FROM COMPANY";
   JSON_Status ser_result = JSONFailure;
 
@@ -184,11 +184,11 @@ static int create_and_test_db(sqlite3* conn) {
 
 
 static void set_json_callback_data(void* exec_data, void* callback_data) {
-  ((db_info*)exec_data)->serialization_callback_data = callback_data;
+  ((connection_info*)exec_data)->serialization_callback_data = callback_data;
 }
 
 
-static db_info* get_execution_data(int connection_index) {
+static connection_info* get_execution_data(int connection_index) {
   return &execution_data;
 }
 
@@ -198,7 +198,7 @@ static JSON_Status execute_sql_for_serialization(
   int cb(void*, int, char**, char**)
 )
 {
-  db_info* edt = (db_info*)exec_data;
+  connection_info* edt = (connection_info*)exec_data;
   char* zErrMsg = NULL;
   int result = sqlite3_exec(edt->connection, edt->sql, cb, edt->serialization_callback_data, &zErrMsg);
 
