@@ -57,7 +57,7 @@ connection_info execution_data = {
   .file_path = DB_PATH,
   .connection = NULL,
   .sql = NULL,
-  .serialization_callback_data = NULL
+  .sqlite_callback_data = NULL
 };
 
 
@@ -184,7 +184,7 @@ static int create_and_test_db(sqlite3* conn) {
 
 
 static void set_json_callback_data(void* exec_data, void* callback_data) {
-  ((connection_info*)exec_data)->serialization_callback_data = callback_data;
+  ((connection_info*)exec_data)->sqlite_callback_data = callback_data;
 }
 
 
@@ -200,7 +200,7 @@ static JSON_Status execute_sql_for_serialization(
 {
   connection_info* edt = (connection_info*)exec_data;
   char* zErrMsg = NULL;
-  int result = sqlite3_exec(edt->connection, edt->sql, cb, edt->serialization_callback_data, &zErrMsg);
+  int result = sqlite3_exec(edt->connection, edt->sql, cb, edt->sqlite_callback_data, &zErrMsg);
 
   if (result != SQLITE_OK) {
     fprintf(stderr, "SQL error: %s\n", zErrMsg);

@@ -16,7 +16,7 @@ connection_info execution_data = {
   .file_path = NULL,
   .connection = NULL,
   .sql = NULL,
-  .serialization_callback_data = NULL
+  .sqlite_callback_data = NULL
 };
 
 
@@ -76,7 +76,7 @@ DLLEXPORT int sqlite_disconnect(WolframLibraryData libData, mint Argc, MArgument
 
 
 static void set_json_callback_data(void* exec_data, void* callback_data) {
-    ((connection_info*)exec_data)->serialization_callback_data = callback_data;
+    ((connection_info*)exec_data)->sqlite_callback_data = callback_data;
 }
 
 
@@ -94,7 +94,6 @@ DLLEXPORT int sqlite_execute(WolframLibraryData libData, mint Argc, MArgument* A
         &(dbinfo->serialized_string)
     );
     free((void*)dbinfo->sql);
-    DEBUG_STMT(printf("Serialized to %s\n", dbinfo->serialized_string));
     dbinfo->sql = NULL;
     if (result == JSONSuccess && dbinfo->serialized_string) {
         MArgument_setUTF8String(Res, (char*)dbinfo->serialized_string);
@@ -150,7 +149,7 @@ static JSON_Status exec_sql(void* exec_data, int cb(void*, int, char**, char**))
         edt->connection,
         edt->sql,
         cb,
-        edt->serialization_callback_data,
+        edt->sqlite_callback_data,
         &zErrMsg
     );
     if (result != SQLITE_OK) {

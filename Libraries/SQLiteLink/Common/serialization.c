@@ -66,41 +66,38 @@ int json_serialization_callback(
 }
 
 
-JSON_Status serialize_to_json(
+int serialize_to_json(
   void* exec_data,
   void set_callback_data(void* exec_data, void* callback_data),
-  JSON_Status exec(
+  int exec(
     void* exec_data,
     int cb(void*, int, char**, char**)
   ),
   const char** result_ptr
 ) {
   char* serialized_string = NULL;
-  JSON_Status status = JSONFailure;
-
+  int result = FAILURE;
   JSON_Value* root_val = json_value_init_object();
   JSON_Object* main_obj = json_value_get_object(root_val);
-
   refresh_JSON_serialization_callback_state();
-
   set_callback_data(exec_data, (void*)main_obj);
-
-  status = exec(exec_data, json_serialization_callback);
-
-  if (status == JSONSuccess) {
+  result = exec(exec_data, json_serialization_callback);
+  if (result == SUCCESS) {
     serialized_string = json_serialize_to_string_pretty(root_val);
     if (serialized_string) {
-      *result_ptr = str_dup(serialized_string);
+      *result_ptr = str_dup(serialized_string); // TODO: handle NULL returned from str_dup
       json_free_serialized_string(serialized_string);
+      DEBUG_STMT(printf("Serialized to %s\n", *result_ptr));
     }
     else {
-      status = JSONFailure;
       *result_ptr = NULL;
+      DEBUG_STMT(printf("Execution / serialization failed\n"));
     }
   }
   // This seems to also free any strings in string arrays, keys, etc.
   // TODO: double-check that!
   json_value_free(root_val);
-  return status;
+  set_callback_data(exec_data, NULL);
+  return result;
 }
 
