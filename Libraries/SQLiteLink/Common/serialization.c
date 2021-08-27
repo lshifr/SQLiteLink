@@ -15,23 +15,15 @@ static void refresh_JSON_serialization_callback_state() {
 }
 
 
-JSON_Status execute_mock_db(
-  void* exec_data, int cb(void*, int, char**, char**)
-);
-
 int json_serialization_callback(
   void* data, int argc, char** argv, char** azColName
 ) {
-  // puts("In json_serialization_callback()");
-
   // TODO: improve sloppy resource / memory management
   JSON_Object* obj = (JSON_Object*)data;
   //static BOOL first_run = TRUE;
 
   // TODO : temporary, until we either start throwing exceptions from  callback, or
   // switch to using the step interface
-  //static BOOL failed = FALSE; 
-
   if (callback_operation_failed) {
     return FAILURE;
   }
@@ -39,7 +31,7 @@ int json_serialization_callback(
   for (int i = 0; i < argc; i++) {
     const char* col_name = azColName[i];
     JSON_Status status = JSONFailure;
-    // printf("The column name: %s, value: %s\n", col_name, argv[i]);
+    DEBUG_STMT(printf("The column name: %s, value: %s\n", col_name, argv[i]));
     if (first_run) {
       // Create new key and json array for values, for a column
       char* key = str_dup(col_name);

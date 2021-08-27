@@ -58,8 +58,6 @@ DLLEXPORT int sqlite_connect(WolframLibraryData libData, mint Argc, MArgument* A
         dbinfo->file_path = str_dup(path);
         result = sqlite3_open(dbinfo->file_path, &(dbinfo->connection));
     }
-    // file_path = str_dup(path);
-    // result = sqlite3_open(file_path, &connection);
     libData->UTF8String_disown(path);
     MArgument_setInteger(Res, result);
     return LIBRARY_NO_ERROR;
@@ -96,7 +94,7 @@ DLLEXPORT int sqlite_execute(WolframLibraryData libData, mint Argc, MArgument* A
         &(dbinfo->serialized_string)
     );
     free((void*)dbinfo->sql);
-    printf("Serialized to %s\n", dbinfo->serialized_string);
+    DEBUG_STMT(printf("Serialized to %s\n", dbinfo->serialized_string));
     dbinfo->sql = NULL;
     if (result == JSONSuccess && dbinfo->serialized_string) {
         MArgument_setUTF8String(Res, (char*)dbinfo->serialized_string);
@@ -143,11 +141,11 @@ static void free_globals(void) {
 static JSON_Status exec_sql(void* exec_data, int cb(void*, int, char**, char**)) {
     char* zErrMsg = NULL;
     db_info* edt = (db_info*)exec_data;
-    printf(
+    DEBUG_STMT(printf(
         "About to execute SQL statement: \n%s\n, for connection %s\n",
         edt->sql,
         edt->file_path
-    );
+    ));
     int result = sqlite3_exec(
         edt->connection,
         edt->sql,
@@ -156,7 +154,7 @@ static JSON_Status exec_sql(void* exec_data, int cb(void*, int, char**, char**))
         &zErrMsg
     );
     if (result != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        DEBUG_STMT(fprintf(stderr, "SQL error: %s\n", zErrMsg));
         if (zErrMsg) {
             edt->sqliteErrMsg = str_dup(zErrMsg);
             sqlite3_free(zErrMsg);
