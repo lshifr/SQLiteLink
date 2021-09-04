@@ -116,6 +116,7 @@ sqlite_rcode sqlite_execute_sql(connection_info* cinfo, int cb(void*, int, char*
     char* zErrMsg = NULL;
     if (!cinfo->connection) {
         // TODO: This should not actually happen. assert() might be better here.
+        DEBUG_STMT(printf("Connection disconnected. SHOULD CONNECT FIRST. Exiting...\n"));
         return SQLITE_CONNECTION_DISCONNECTED;
     }
     assert(cinfo->sql);
