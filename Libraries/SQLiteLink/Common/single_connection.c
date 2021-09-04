@@ -4,12 +4,12 @@
 #include "single_connection.h"
 
 
-static void clear_error_message(connection_info* cinfo){
+static void clear_error_message(connection_info* cinfo) {
     SET_DALLOC_POINTER_FIELD(cinfo, sqliteErrMsg, NULL);
 }
 
 
-static void clear_sql_string(connection_info* cinfo){
+static void clear_sql_string(connection_info* cinfo) {
     SET_DALLOC_POINTER_FIELD(cinfo, sql, NULL);
 }
 
@@ -27,7 +27,7 @@ static void set_sql_string(connection_info* cinfo, const char* sql) {
 }
 
 
-void sqlite_connection_create(connection_info* conn, const char* path){
+void sqlite_connection_create(connection_info* conn, const char* path) {
     if (conn->in_use) {
         return; // Can only init unused connection
     }
@@ -41,8 +41,8 @@ void sqlite_connection_create(connection_info* conn, const char* path){
 }
 
 
-sqlite_rcode sqlite_connection_destroy(connection_info* cinfo){
-    if(sqlite_is_connected(cinfo)){
+sqlite_rcode sqlite_connection_destroy(connection_info* cinfo) {
+    if (sqlite_is_connected(cinfo)) {
         return SQLITE_MUST_DISCONNECT_FIRST;
     }
     refresh_connection_info(cinfo);
@@ -52,7 +52,7 @@ sqlite_rcode sqlite_connection_destroy(connection_info* cinfo){
 }
 
 
-void sqlite_set_sql_string(connection_info* cinfo, const char* sql){
+void sqlite_set_sql_string(connection_info* cinfo, const char* sql) {
     if (cinfo->sql) {
         free((void*)cinfo->sql);
     }
@@ -60,17 +60,17 @@ void sqlite_set_sql_string(connection_info* cinfo, const char* sql){
 }
 
 
-void sqlite_set_callback_data(connection_info* cinfo, void* cbdata){
+void sqlite_set_callback_data(connection_info* cinfo, void* cbdata) {
     cinfo->sqlite_callback_data = cbdata;
 }
 
 
-BOOL sqlite_is_connection_in_use(connection_info* cinfo){
+BOOL sqlite_is_connection_in_use(connection_info* cinfo) {
     return cinfo->in_use;
 }
 
 
-sqlite_rcode sqlite_connect(connection_info* cinfo){
+sqlite_rcode sqlite_connect(connection_info* cinfo) {
     int result;
     assert(cinfo->file_path);
     if (sqlite_is_connected(cinfo)) {
@@ -81,9 +81,9 @@ sqlite_rcode sqlite_connect(connection_info* cinfo){
 }
 
 
-sqlite_rcode sqlite_disconnect(connection_info* cinfo){
+sqlite_rcode sqlite_disconnect(connection_info* cinfo) {
     int result;
-    if (!sqlite_is_connected(cinfo)){
+    if (!sqlite_is_connected(cinfo)) {
         return SQLITE_SUCCESS; // If already disconnected, do nothing
     }
     result = sqlite3_close(cinfo->connection);
@@ -116,7 +116,7 @@ const char* sqlite_get_serialized_string(connection_info* cinfo) {
 **  To execute this on its own, one has to fill in sql string and callback data,
 **  into the passed <connection_info> structure, prior to this call.
 */
-sqlite_rcode sqlite_execute_sql(connection_info* cinfo, int cb(void*, int, char**, char**)){
+sqlite_rcode sqlite_execute_sql(connection_info* cinfo, int cb(void*, int, char**, char**)) {
     char* zErrMsg = NULL;
     if (!cinfo->connection) {
         // TODO: This should not actually happen. assert() might be better here.
