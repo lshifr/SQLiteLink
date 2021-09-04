@@ -152,7 +152,17 @@ static int exec_sql_for_serialization(void* exec_data, int cb(void*, int, char**
     return sqlite_execute_sql((connection_info*)exec_data, cb) == SQLITE_SUCCESS ? SUCCESS : FAILURE;
 }
 
-
+/*
+**  This executes SQL with a given connection, and serializes the result to string.
+**  The serializer function should be passed as a third argument. It can use the
+**  passed callback data setter (set_sqlite_callback_data here), on exec_data
+**  (which is a pointer to connection data, in disguise), to set whatever callback
+**  information it will need. It is supposed to call <exec> (<exec_sql_for_serialization>
+**  here), somewhere in its body, providing its own custom callback function, which
+**  will be called inside <exec> for each data row. That custom callback function
+**  call allows serializer to collect the necessary info for that row serialization,
+**  adding it to the callback data field that it has supposedly previously set.
+*/
 int sqlite_execute_sql_with_serialization(
     connection_info* cinfo,
     const char* sql,
