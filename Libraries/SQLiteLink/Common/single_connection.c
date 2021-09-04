@@ -95,15 +95,19 @@ sqlite_rcode sqlite_disconnect(connection_info* cinfo){
 }
 
 
-BOOL sqlite_is_connected(connection_info* cinfo){
+BOOL sqlite_is_connected(connection_info* cinfo) {
     return cinfo->connection != NULL;
 }
 
 
-const char* sqlite_get_error_message_copy(connection_info* cinfo){
-    return str_dup(cinfo->sqliteErrMsg);
-} 
+const char* sqlite_get_error_message(connection_info* cinfo) {
+    return cinfo->sqliteErrMsg;
+}
 
+
+const char* sqlite_get_serialized_string(connection_info* cinfo) {
+    return cinfo->serialized_string;
+}
 
 /*
 **  A wrapper around sqlite3_exec, that takes care of error message memory

@@ -36,8 +36,9 @@ BOOL sqlite_is_connection_in_use(connection_info* cinfo);
 sqlite_rcode sqlite_connect(connection_info* cinfo);
 sqlite_rcode sqlite_disconnect(connection_info* cinfo);
 BOOL sqlite_is_connected(connection_info* cinfo);
-const char* sqlite_get_error_message_copy(connection_info* cinfo);
+const char* sqlite_get_error_message(connection_info* cinfo);
 sqlite_rcode sqlite_execute_sql(connection_info* cinfo, int cb(void*, int, char**, char**));
+const char* sqlite_get_serialized_string(connection_info* cinfo);
 
 
 int sqlite_execute_sql_with_serialization(
