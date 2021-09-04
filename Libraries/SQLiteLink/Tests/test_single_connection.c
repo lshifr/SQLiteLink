@@ -19,9 +19,19 @@ do{                                                     \
 
 
 #define SCONN_DB_PATH "test_sconn.db"
+#define SERIALIZED_COLUMN_NAME "ID"
+
+#define MAX_ROWS 10
+
+typedef struct column {
+    const char* rows[MAX_ROWS];
+    int len;
+    const char* col_name;
+} column;
 
 
 connection_info execution_data;
+column storage;
 
 const char* simple_sql = "SELECT COUNT(*) AS row_count FROM COMPANY";
 const char* col_name;
@@ -36,6 +46,87 @@ static int simple_test_callback(void* data, int argc, char** argv, char** azColN
         result = argv[0];
     }
     return 0;
+}
+
+
+static const char* concat_all(int argc, char* delimeter, const char** argv) {
+    int total_len = 0;
+    char* result = NULL;
+    for (int i = 0; i < argc; i++) {
+        total_len += strlen(argv[i]);
+    }
+    if(delimeter){
+        total_len += (argc - 1) * strlen(delimeter);
+    }
+    result = (char*)malloc(total_len + 1);
+    if (!result) {
+        return NULL;
+    }
+    for (int i = 0, j = 0; i < argc; i++) {
+        const char* start = argv[i];
+        while (*start) {
+            result[j++] = *start++;
+        }
+        if(delimeter){
+            start = delimeter;
+            while (*start) {
+                result[j++] = *start++;
+            }
+        }
+    }
+    result[total_len] = '\0';
+    return result;
+}
+
+static int simple_column_serializer_callback(void* data, int argc, char** argv, char** azColName){
+    column * storage = (column*) data;
+    for(int i = 0; i < argc; i++){
+        if(!strcmp(azColName[i], storage->col_name) && storage->len < MAX_ROWS){
+            (storage -> rows)[storage->len++] = str_dup(argv[i]); // TODO: handle NULL returned by str_dup
+        }
+    }
+    return 0;
+}
+
+/**
+ *  Simple table column serializer. Column name is pre-defined globally.
+ *  Serializes single column of resulting (virtual) table obtained by 
+ *  executing a query, using simple string concatenation with comma as a 
+ *  delimeter. 
+ */ 
+static int column_serializer(
+    void* exec_data,
+    void set_callback_data(void* exec_data, void* callback_data),
+    int exec(
+        void* exec_data,
+        int cb(void*, int, char**, char**)
+    ),
+    const char** result_ptr
+){
+    int result;
+    column* col = &storage;
+    const char* serialized = NULL;
+    col->col_name = SERIALIZED_COLUMN_NAME;
+    col->len = 0;
+    set_callback_data(exec_data, (void*)col);
+    result = exec(exec_data, simple_column_serializer_callback);
+    if(result == SUCCESS){
+        serialized = concat_all(col->len, ",", col->rows);
+        if (!serialized) {
+            result = FAILURE;
+        } 
+    } 
+    for (int i = 0; i < col->len; i++) {
+        if (col->rows[i]) {
+            free((void *) col->rows[i]);
+        }
+    }
+    if(result_ptr){
+        *result_ptr = serialized;
+    } else {
+        free((void *) serialized);
+    }
+    return result;
 }
 
 
@@ -70,6 +161,16 @@ int main(int argc, char** argv){
         sqlite_execute_sql(conn, simple_test_callback) != SQLITE_SUCCESS
             || !strcmp(col_name, "row_count")
             || !strcmp(result, "4")
+    );
+
+    return_on_failure(
+        "Testing sqlite_execute_sql_with_serialization(), simple column serializer",
+        NULL,
+        sqlite_execute_sql_with_serialization(
+            conn, 
+            "SELECT * FROM COMPANY", 
+            column_serializer
+        ) != SUCCESS || strcmp(conn->serialized_string, "1,2,3,4")
     );
 
     return_on_failure(
