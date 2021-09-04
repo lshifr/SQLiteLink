@@ -3,6 +3,12 @@
 #include "Common/connections.h"
 #include "Common/serialization.h"
 
+#define INT_CONNECTION_API_CALL_WRAPPER(args, res, func)    \
+do{                                                         \
+    int chandle_index = MArgument_getInteger(args[0]);      \
+    int result = func(chandle_index);                       \
+    MArgument_setInteger(res, result);                      \
+} while(0)
 
 DLLEXPORT mint WolframLibrary_getVersion()
 {
@@ -32,33 +38,25 @@ DLLEXPORT int SQLiteLink_new_connection(WolframLibraryData libData, mint Argc, M
 
 
 DLLEXPORT int SQLiteLink_destroy_connection(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
-    int chandle_index = MArgument_getInteger(Args[0]);
-    int result = destroy_connection(chandle_index);
-    MArgument_setInteger(Res, result);
+    INT_CONNECTION_API_CALL_WRAPPER(Args, Res, destroy_connection);
     return LIBRARY_NO_ERROR;
 }
 
 
 DLLEXPORT int SQLiteLink_connect(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
-    int chandle_index = MArgument_getInteger(Args[0]);
-    int result = connect(chandle_index);
-    MArgument_setInteger(Res, result);
+    INT_CONNECTION_API_CALL_WRAPPER(Args, Res, connect);
     return LIBRARY_NO_ERROR;
 }
 
 
 DLLEXPORT int SQLiteLink_disconnect(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
-    int chandle_index = MArgument_getInteger(Args[0]);
-    int result = disconnect(chandle_index);
-    MArgument_setInteger(Res, result);
+    INT_CONNECTION_API_CALL_WRAPPER(Args, Res, disconnect);
     return LIBRARY_NO_ERROR;
 }
 
 
 DLLEXPORT int SQLiteLink_is_connected(WolframLibraryData libData, mint Argc, MArgument* Args, MArgument Res) {
-    int chandle_index = MArgument_getInteger(Args[0]);
-    int result = is_connected(chandle_index);
-    MArgument_setInteger(Res, result);
+    INT_CONNECTION_API_CALL_WRAPPER(Args, Res, is_connected);
     return LIBRARY_NO_ERROR;
 }
 
