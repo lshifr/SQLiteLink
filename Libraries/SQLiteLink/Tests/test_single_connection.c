@@ -179,6 +179,17 @@ int main(int argc, char** argv){
         sqlite_disconnect(conn) != SQLITE_SUCCESS || sqlite_is_connected(conn)
     );
 
+    /**
+     *  TODO:
+     * 
+     *  1. Test SQL execution error / error string extraction
+     *  2. Test connection failure
+     *  3. Test disconnection failure
+     *  4. Test connection disconnected error
+     *  5. Test "must disconnect first" error
+     * 
+     */
+
     printf("\n\n******* All tests passed ********\n\n");
 
     return EXIT_SUCCESS;
