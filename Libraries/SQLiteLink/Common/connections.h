@@ -8,6 +8,8 @@
 #define MAX_ACTIVE_CONNECTIONS 1000
 #define MAX_CONNECTIONS_EXCEEDED -1
 #define INVALID_CONNECTION_INDEX 2
+#define CONNECTION_DOES_NOT_EXIST 3
+#define CONNECTION_DISCONNECTED 4
 
 
 int new_connection(const char* path);
