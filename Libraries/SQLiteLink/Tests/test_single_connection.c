@@ -5,6 +5,18 @@
 #include "../Common/single_connection.h"
 #include "sample_db.h"
 
+#define return_on_failure(msg, init, cond)              \
+do{                                                     \
+    BOOL failed;                                        \
+    printf("%s...", msg);                               \
+    do {init;} while(0);                                \
+    failed = (cond);                                    \
+    printf("%s\n", failed ? "Failed" : "Ok");           \
+    if (failed) {                                       \
+        return EXIT_FAILURE;                            \
+    }                                                   \
+} while(0)
+
 
 #define SCONN_DB_PATH "test_sconn.db"
 
@@ -30,48 +42,41 @@ static int simple_test_callback(void* data, int argc, char** argv, char** azColN
 int main(int argc, char** argv){
     const char* sql = argc > 1 ? argv[1] : "SELECT ID, NAME FROM COMPANY";
     connection_info* conn = &execution_data;
-    int failed;
 
-    printf("Creating sample db for tests...\n");
-
-    if (create_and_test_db_complete(SCONN_DB_PATH, NULL, NULL, NULL, FALSE) != SUCCESS){
-        printf("Failed to create sample db. Exiting...\n");
-        return EXIT_FAILURE;
-    }
+    return_on_failure(
+        "Creating sample db for tests",
+        NULL,
+        create_and_test_db_complete(SCONN_DB_PATH, NULL, NULL, NULL, FALSE) != SUCCESS
+    );
 
     printf("Creating a connection...\n");
     sqlite_connection_create(conn, SCONN_DB_PATH);
     
-    printf("Connecting to db...");
-    failed = sqlite_connect(conn) != SQLITE_SUCCESS;
-    printf("%s\n", failed ? "Failed" : "Ok");
-    if (failed){
-        return EXIT_FAILURE;
-    }
+    return_on_failure(
+        "Connecting to db",
+        NULL,
+        sqlite_connect(conn) != SQLITE_SUCCESS
+    );
 
-    printf("Testing sqlite_is_connected(), should yield TRUE...");
-    failed = sqlite_is_connected(conn) != TRUE;
-    printf("%s\n", failed ? "Failed" : "Ok");
-    if (failed) {
-        return EXIT_FAILURE;
-    }
+    return_on_failure(
+        "Testing sqlite_is_connected(), should yield TRUE",
+        NULL,
+        sqlite_is_connected(conn) != TRUE
+    );
 
-    printf("Testing sqlite_execute_sql()...");
-    sqlite_set_sql_string(conn, simple_sql);
-    failed = sqlite_execute_sql(conn, simple_test_callback) != SQLITE_SUCCESS
-        || !strcmp(col_name, "row_count")
-        || !strcmp(result, "4");
-    printf("%s\n", failed ? "Failed" : "Ok");
-    if (failed){
-        return EXIT_FAILURE;
-    }
+    return_on_failure(
+        "Testing sqlite_execute_sql()",
+        sqlite_set_sql_string(conn, simple_sql),
+        sqlite_execute_sql(conn, simple_test_callback) != SQLITE_SUCCESS
+            || !strcmp(col_name, "row_count")
+            || !strcmp(result, "4")
+    );
 
-    printf("Testing sqlite_disconnect()...");
-    failed = sqlite_disconnect(conn) != SQLITE_SUCCESS || sqlite_is_connected(conn);
-    printf("%s\n", failed ? "Failed" : "Ok");
-    if (failed) {
-        return EXIT_FAILURE;
-    }
+    return_on_failure(
+        "Testing sqlite_disconnect()",
+        NULL,
+        sqlite_disconnect(conn) != SQLITE_SUCCESS || sqlite_is_connected(conn)
+    );
 
     printf("\n\n******* All tests passed ********\n\n");
 
