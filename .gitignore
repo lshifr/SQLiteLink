@@ -12,10 +12,6 @@
 *.map
 *.exp
 
-# Precompiled Headers
-*.gch
-*.pch
-
 # Libraries
 *.lib
 *.a
@@ -52,9 +48,9 @@ Mkfile.old
 dkms.conf
 
 # Project - specific
-
 Build
 .history
 .vscode
 # Perhaps temporarily, exclude Libraries/Libs. It should contain sqlite3.c, sqlite3.h. parson.c, parson.h
 Libraries/Libs 
+SQLiteLink/LibraryResources/*
